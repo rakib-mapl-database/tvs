@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TVS Wholesale — Analytics Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#697386;--border:#e5e7eb;--primary:#2563eb;--success:#16a34a;--danger:#dc2626;--warning:#d97706}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+.header{background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;padding:24px 5%}.header-inner{max-width:1400px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:15px}.header h1{margin:0;font-size:26px}.header p{margin:5px 0 0;opacity:.8;font-size:13px}
+.nav{display:flex;gap:8px}.nav a,.nav button{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:white;padding:9px 13px;border-radius:9px;text-decoration:none;cursor:pointer}
+.container{max-width:1400px;margin:24px auto;padding:0 18px}.filters,.grid,.charts{display:grid;gap:16px}.filters{grid-template-columns:1fr 1fr auto auto}.filters input,.filters button{padding:11px;border:1px solid var(--border);border-radius:9px;background:white}.filters button{background:var(--primary);color:white;border:0;font-weight:700}
+.grid{grid-template-columns:repeat(4,1fr);margin:18px 0}.card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:19px;box-shadow:0 5px 20px rgba(15,23,42,.04)}.label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase}.value{font-size:25px;font-weight:800;margin-top:8px;font-variant-numeric:tabular-nums}.charts{grid-template-columns:2fr 1fr;margin-bottom:16px}.chart-box{height:330px}.wide{grid-column:1/-1}.chart-title{font-size:16px;font-weight:800;margin-bottom:4px}.sub{font-size:12px;color:var(--muted);margin-bottom:12px}
+.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}.insight{padding:16px;border-radius:13px;background:#f8fafc;border:1px solid var(--border)}.insight strong{display:block;font-size:13px;margin-bottom:7px}.insight span{font-size:20px;font-weight:800}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:600px}th,td{padding:11px;border-bottom:1px solid var(--border);text-align:left}th{font-size:11px;color:var(--muted);text-transform:uppercase}td{font-size:13px}tfoot td{font-weight:800}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}.insights{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.header-inner{align-items:flex-start;flex-direction:column}.header h1{font-size:21px}.container{padding:0 10px;margin-top:14px}.grid{grid-template-columns:1fr 1fr;gap:9px}.card{padding:13px}.value{font-size:18px}.charts{gap:10px}.chart-box{height:260px}.insights{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.filters button{grid-column:auto}.nav{width:100%}.nav a,.nav button{flex:1;text-align:center}}
+</style>
+</head>
+<body>
+<header class="header"><div class="header-inner">
+<div><h1>📊 TVS Wholesale Analytics</h1><p>Management Sales Trend & Performance Dashboard</p></div>
+<nav class="nav"><a href="index.html">🏠 Home</a><a href="login.html">🔐 Login</a><button onclick="loadData()">↻ Refresh</button></nav>
+</div></header>
+<main class="container">
+<div class="card filters">
+<input type="date" id="fromDate"><input type="date" id="toDate"><button onclick="applyFilter()">Filter</button><button onclick="resetFilter()">Reset</button>
+</div>
+<section class="grid">
+<div class="card"><div class="label">Total Sales</div><div class="value" id="total">৳ 0</div></div>
+<div class="card"><div class="label">Monthly Target</div><div class="value" id="target">৳ 0</div></div>
+<div class="card"><div class="label">Achievement</div><div class="value" id="achievement">0%</div></div>
+<div class="card"><div class="label">Remaining Target</div><div class="value" id="remaining">৳ 0</div></div>
+</section>
+<section class="charts">
+<div class="card"><div class="chart-title">📈 Sales Trend</div><div class="sub">Daily actual sales</div><div class="chart-box"><canvas id="trend"></canvas></div></div>
+<div class="card"><div class="chart-title">🎯 Target Achievement</div><div class="sub">Current sales vs target</div><div class="chart-box"><canvas id="gauge"></canvas></div></div>
+<div class="card"><div class="chart-title">📅 Saturday → Thursday</div><div class="sub">Latest working-week sales</div><div class="chart-box"><canvas id="week"></canvas></div></div>
+<div class="card"><div class="chart-title">📊 Monthly Comparison</div><div class="sub">Actual monthly sales</div><div class="chart-box"><canvas id="months"></canvas></div></div>
+<div class="card wide"><div class="chart-title">📈 Monthly Sales Trend</div><div class="sub">Year-to-date actual sales</div><div class="chart-box"><canvas id="monthlyTrend"></canvas></div></div>
+</section>
+<section class="insights">
+<div class="insight"><strong>🏆 Highest Sales Day</strong><span id="highest">—</span></div>
+<div class="insight"><strong>⚠️ Lowest Sales Day</strong><span id="lowest">—</span></div>
+<div class="insight"><strong>🎯 Required / Day</strong><span id="required">৳ 0</span></div>
+</section>
+<section class="card"><div class="chart-title">📋 Sales Records</div><div class="sub">Filtered actual records</div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Day</th><th>Sales Amount</th></tr></thead><tbody id="rows"></tbody><tfoot><tr><td colspan="2" style="text-align:right">Current Month Total</td><td id="monthTotal">৳ 0</td></tr><tr><td colspan="2" style="text-align:right">In Word</td><td id="monthWords">Zero Taka Only</td></tr></tfoot></table></div></section>
+</main>
+<script>
+const scriptURL="https://script.google.com/macros/s/AKfycbw-PJcMD7E9fyJri1NF-uNHfSfbPERPZqXveM0uT0HLOeNocB8p_XIa9eudvUrkERNK/exec";
+let data=[],target=8330000,charts={};
+const $=id=>document.getElementById(id), money=n=>"৳ "+Math.round(Number(n)||0).toLocaleString("en-US");
+function dateNorm(v){let s=String(v??"").trim(),m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return`${m[1]}-${String(m[2]).padStart(2,"0")}-${String(m[3]).padStart(2,"0")}`;m=s.match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);return m?`${m[3]}-${String(m[2]).padStart(2,"0")}-${String(m[1]).padStart(2,"0")}`:""}
+function amount(v){let n=Number(String(v??"").replace(/[৳,\s]/g,""));return isFinite(n)?n:0}
+function words(n){n=Math.round(n);if(!n)return"Zero Taka Only";const o=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"],t=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];function u(x){let r="";if(x>=100){r=o[Math.floor(x/100)]+" Hundred";x%=100;if(x)r+=" "}if(x>=20){r+=t[Math.floor(x/10)];x%=10;if(x)r+=" "+o[x]}else if(x)r+=o[x];return r}let c=Math.floor(n/1e7);n%=1e7,l=Math.floor(n/1e5);n%=1e5,k=Math.floor(n/1e3);n%=1e3;let a=[];if(c)a.push(u(c)+" Crore");if(l)a.push(u(l)+" Lakh");if(k)a.push(u(k)+" Thousand");if(n)a.push(u(n));return a.join(" ")+" Taka Only"}
+function localToday(){let d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function iso(d){return d.toISOString().slice(0,10)}
+function sum(rows){return rows.reduce((a,r)=>a+r.amount,0)}
+function destroy(id){if(charts[id])charts[id].destroy()}
+function chart(id,type,labels,values,label){destroy(id);charts[id]=new Chart($(id),{type,data:{labels,datasets:[{label,data:values,borderWidth:3,tension:.3,fill:type==="line",backgroundColor:"rgba(37,99,235,.12)",borderColor:"#2563eb"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.raw)}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>"৳ "+Number(v).toLocaleString("en-US")}}}}})}
+function render(rows){let total=sum(rows),ach=target?total/target*100:0;$("total").textContent=money(total);$("target").textContent=money(target);$("achievement").textContent=ach.toFixed(2)+"%";$("remaining").textContent=money(Math.max(0,target-total));
+let daily={};rows.forEach(r=>daily[r.date]=(daily[r.date]||0)+r.amount);let ds=Object.keys(daily).sort();chart("trend","line",ds.map(x=>x.slice(5)),ds.map(x=>daily[x]),"Sales");
+let pct=Math.min(100,ach);destroy("gauge");charts.gauge=new Chart($("gauge"),{type:"doughnut",data:{labels:["Achieved","Remaining"],datasets:[{data:[pct,100-pct],backgroundColor:["#16a34a","#e5e7eb"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:"72%",plugins:{legend:{position:"bottom"},tooltip:{callbacks:{label:c=>c.label+": "+c.raw.toFixed(2)+"%"}}}}});
+let today=localToday(),sat=new Date(today);sat.setDate(today.getDate()-((today.getDay()+1)%7));let wl=["Sat","Sun","Mon","Tue","Wed","Thu"],wd=[],wv=[];for(let i=0;i<6;i++){let d=new Date(sat);d.setDate(sat.getDate()+i);let x=iso(d);wd.push(wl[i]);wv.push(sum(data.filter(r=>r.date===x)))}chart("week","bar",wd,wv,"Weekly");
+let now=new Date(),labels=[],vals=[];for(let i=0;i<12;i++){let d=new Date(now.getFullYear(),now.getMonth()-11+i,1);let p=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;labels.push(d.toLocaleString("en-US",{month:"short"}));vals.push(sum(data.filter(r=>r.date.startsWith(p))))}chart("months","bar",labels,vals,"Monthly");chart("monthlyTrend","line",labels,vals,"Monthly Sales");
+let sorted=[...rows].sort((a,b)=>b.amount-a.amount);$("highest").textContent=sorted.length?money(sorted[0].amount):"—";$("lowest").textContent=sorted.length?money(sorted.at(-1).amount):"—";
+let mprefix=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`,mt=sum(data.filter(r=>r.date.startsWith(mprefix)));$("monthTotal").textContent=money(mt);$("monthWords").textContent=words(mt);
+let rem=new Date(today.getFullYear(),today.getMonth()+1,0).getDate()-today.getDate();$("required").textContent=money(rem>0?Math.max(0,target-mt)/rem:0);
+$("rows").innerHTML=rows.length?rows.sort((a,b)=>a.date.localeCompare(b.date)).map(r=>`<tr><td>${r.date}</td><td>${new Date(r.date+"T00:00:00").toLocaleDateString("en-US",{weekday:"long"})}</td><td>${money(r.amount)}</td></tr>`).join(""):`<tr><td colspan="3" style="text-align:center">No records found</td></tr>`}
+function applyFilter(){let f=$("fromDate").value,t=$("toDate").value;render(data.filter(r=>(!f||r.date>=f)&&(!t||r.date<=t)))}
+function resetFilter(){let d=localToday(),s=new Date(d.getFullYear(),d.getMonth(),1),e=new Date(d.getFullYear(),d.getMonth()+1,0);$("fromDate").value=iso(s);$("toDate").value=iso(e);render(data)}
+function loadData(){fetch(scriptURL,{cache:"no-store"}).then(r=>r.json()).then(x=>{target=amount(x.monthlyTarget||8330000);data=(x.sales||[]).map(r=>({date:dateNorm(r.date),amount:amount(r.amount)})).filter(r=>r.date);resetFilter()}).catch(e=>alert("Unable to load dashboard data."))}
+loadData();
+</script></body></html>
