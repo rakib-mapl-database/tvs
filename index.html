@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TVS Wholesale Sales Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success-color: #059669;
+            --danger-color: #dc2626;
+            --warning-color: #d97706;
+            --info-color: #0284c7;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --table-hover: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #3b82f6;
+            --primary-hover: #60a5fa;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #38bdf8;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --table-hover: #273548;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 24px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        /* অ্যানিমেটেড নোটিশ টিকার (C Column) */
+        .notice-ticker {
+            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            font-size: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+            overflow: hidden;
+        }
+
+        .notice-ticker span.icon {
+            font-size: 18px;
+            animation: bounce 1.5s infinite;
+            flex-shrink: 0;
+        }
+
+        .notice-content {
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+        }
+
+        .notice-text {
+            display: inline-block;
+            animation: fadeInOut 0.8s ease-in-out;
+            font-weight: 600;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* স্টিকি হেডার */
+        .header-section {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 16px 28px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-brand img {
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .header-title h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .header-title p {
+            margin: 2px 0 0 0;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ডেট ফিল্টার সেকশন */
+        .filter-card {
+            background: var(--card-bg);
+            padding: 20px 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+            margin-bottom: 24px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn-reset { background-color: var(--text-muted); }
+
+        /* প্রধান ৪টি KPI কার্ড গ্রিড */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 22px 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card h4 {
+            margin: 0 0 8px 0;
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+
+        .stat-card .value,
+        .day-box .day-val,
+        #projectedSalesVal,
+        #salesRecordsTable td:last-child,
+        #salesRecordsTable tfoot td {
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        #salesRecordsTable tfoot td {
+            border-top: 2px solid var(--border-color);
+            background: var(--bg-color);
+        }
+
+        .stat-card .trend {
+            font-size: 12px;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+        .trend.up { color: var(--success-color); }
+        .trend.down { color: var(--danger-color); }
+
+        .card {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        h3 {
+            color: var(--text-color);
+            margin-top: 0;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        /* প্রোগ্রেস বার সেকশন */
+        .progress-box {
+            margin-bottom: 20px;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .progress-bar-bg {
+            background-color: var(--border-color);
+            border-radius: 10px;
+            height: 14px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            background-color: var(--success-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        /* Sat-Thu Weekly Sales Layout */
+        .weekly-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .day-box {
+            background: var(--bg-color);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .day-box .day-name {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .day-box .day-val {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 8px 0 4px 0;
+        }
+
+        /* অতিরিক্ত ইনসাইটস বা স্ট্যাটাস ব্যাজ */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .status-on-track { background: rgba(5, 150, 105, 0.1); color: var(--success-color); }
+        .status-attention { background: rgba(217, 119, 6, 0.1); color: var(--warning-color); }
+        .status-behind { background: rgba(220, 38, 38, 0.1); color: var(--danger-color); }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: var(--bg-color);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        tbody tr:hover {
+            background-color: var(--table-hover);
+        }
+
+        tfoot td { border-bottom: none; }
+
+        .btn-theme, .btn-login {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 14px;
+            font-size: 13px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-theme:hover, .btn-login:hover { background-color: var(--border-color); }
+        
+        .btn-login {
+            color: var(--primary-color);
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+        .btn-login:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+
+        /* Detailed Sales Records - iPhone & Android Responsive */
+        .sales-records-card {
+            overflow: hidden;
+        }
+
+        .sales-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        #salesRecordsTable {
+            min-width: 560px;
+            margin-top: 0;
+        }
+
+        #salesRecordsTable th:first-child,
+        #salesRecordsTable td:first-child {
+            width: 32%;
+        }
+
+        #salesRecordsTable th:nth-child(2),
+        #salesRecordsTable td:nth-child(2) {
+            width: 28%;
+        }
+
+        #salesRecordsTable th:last-child,
+        #salesRecordsTable td:last-child {
+            width: 40%;
+            text-align: right;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-refresh {
+            background-color: var(--success-color);
+        }
+
+        .btn-refresh:hover {
+            filter: brightness(0.92);
+        }
+
+        .refresh-spin {
+            display: inline-block;
+            animation: refreshSpin 0.8s linear infinite;
+        }
+
+        @keyframes refreshSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+            }
+
+            .container {
+                width: 100%;
+            }
+
+            .card {
+                padding: 14px;
+                border-radius: 14px;
+                margin-bottom: 14px;
+            }
+
+            .card h3 {
+                font-size: 16px;
+                margin-bottom: 14px;
+            }
+
+            .sales-table-wrap {
+                margin: 0 -2px;
+                border-radius: 10px;
+            }
+
+            #salesRecordsTable {
+                min-width: 100%;
+                table-layout: fixed;
+            }
+
+            #salesRecordsTable th,
+            #salesRecordsTable td {
+                padding: 11px 8px;
+                font-size: 12px;
+            }
+
+            #salesRecordsTable th {
+                font-size: 10px;
+                letter-spacing: 0.3px;
+            }
+
+            #salesRecordsTable th:first-child,
+            #salesRecordsTable td:first-child {
+                width: 34%;
+            }
+
+            #salesRecordsTable th:nth-child(2),
+            #salesRecordsTable td:nth-child(2) {
+                width: 27%;
+            }
+
+            #salesRecordsTable th:last-child,
+            #salesRecordsTable td:last-child {
+                width: 39%;
+                text-align: right;
+            }
+
+            #salesRecordsTable td:first-child {
+                white-space: nowrap;
+                font-size: 11px !important;
+            }
+
+            #salesRecordsTable td:nth-child(2) span {
+                padding: 4px 6px !important;
+                font-size: 10px !important;
+            }
+
+            #salesRecordsTable tfoot td {
+                padding: 10px 8px;
+                font-size: 11px !important;
+            }
+
+            #salesRecordsTable tfoot td:first-child {
+                white-space: normal;
+            }
+
+            .filter-actions {
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 7px;
+            }
+
+            .filter-actions .btn {
+                width: 100%;
+                padding: 10px 7px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 390px) {
+            #salesRecordsTable th,
+            #salesRecordsTable td {
+                padding: 9px 6px;
+            }
+
+            #salesRecordsTable td:first-child {
+                font-size: 10px !important;
+            }
+
+            #salesRecordsTable td:last-child {
+                font-size: 11px !important;
+            }
+
+            .filter-actions {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .filter-actions .btn-refresh {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .header-section {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    const savedTheme = localStorage.getItem("theme") || "light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+</script>
+
+<div class="container">
+    <!-- স্টিকি হেডার -->
+    <div class="header-section">
+        <div class="header-brand">
+            <img src="https://www.tvsmotor.com/-/media/Feature/Header/TVSLogo-hr.svg" alt="TVS Logo">
+            <div class="header-title">
+                <h2>TVS Wholesales Sales Data</h2>
+                <p>Advanced Wholesale Target & Performance Tracking</p>
+            </div>
+        </div>
+        <div class="header-right">
+             <a href="dashboard.html" class="btn">📊 Dashboard</a>
+            <a href="login.html" class="btn-login">🔑 Login</a>
+            <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()">🌙 Mode</button>
+        </div>
+    </div>
+
+    <!-- C কলামের অ্যানিমেটেড নোটিশ টিকার -->
+    <div class="notice-ticker">
+        <span class="icon">📢</span>
+        <div class="notice-content">
+            <span class="notice-text" id="animatedNoteText">Loading notices from C column...</span>
+        </div>
+    </div>
+
+    <!-- 1. Date Filter Section -->
+    <div class="filter-card">
+        <div class="form-group">
+            <label>From Date</label>
+            <input type="date" id="fromDate">
+        </div>
+        <div class="form-group">
+            <label>To Date</label>
+            <input type="date" id="toDate">
+        </div>
+        <div class="filter-actions">
+            <button class="btn" onclick="applyDateFilter()">🔄 Filter</button>
+            <button class="btn btn-reset" onclick="resetDateFilter()">Reset</button>
+            <button class="btn btn-refresh" id="refreshBtn" onclick="refreshDashboard()">↻ Refresh</button>
+        </div>
+    </div>
+
+    <!-- 2. Main KPI Cards (4 Cards) -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h4>Total Sales</h4>
+            <p class="value" id="totalSalesVal">৳ 0</p>
+            <div class="trend" id="selectedDateRangeLabel">Selected Period</div>
+        </div>
+        <div class="stat-card">
+            <h4>Monthly Target</h4>
+            <p class="value" id="monthlyTargetVal">৳ 0</p>
+            <div class="trend">Target Sheet Value</div>
+        </div>
+        <div class="stat-card">
+            <h4>Achievement %</h4>
+            <p class="value" id="achievementPercentVal">0.00%</p>
+            <div class="trend up" id="achSubText">Sales ÷ Target</div>
+        </div>
+        <div class="stat-card">
+            <h4>Remaining Target</h4>
+            <p class="value" id="remainTargetVal">৳ 0</p>
+            <div class="trend down">Pending Balance</div>
+        </div>
+    </div>
+
+    <!-- Target vs Sales Progress & Status -->
+    <div class="card">
+        <h3>Monthly Target vs Actual Sales Performance</h3>
+        <div class="progress-box">
+            <div class="progress-label">
+                <span>Achievement Progress</span>
+                <span id="progressText">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="monthlyBar"></div>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; flex-wrap: wrap; gap: 10px;">
+            <div><strong>Target Status:</strong> <span id="targetStatusBadge" class="status-badge status-attention">Checking...</span></div>
+            <div><strong>Projected Monthly Sales:</strong> <span id="projectedSalesVal" style="font-weight: 700; color: var(--primary-color);">৳ 0</span></div>
+        </div>
+    </div>
+
+    <!-- অতিরিক্ত ইনসাইটস কার্ডস (Average, Highest, Lowest, Daily Required) -->
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="stat-card">
+            <h4>Avg. Daily Sales</h4>
+            <p class="value" id="avgDailySalesVal" style="font-size: 20px;">৳ 0</p>
+        </div>
+        <div class="stat-card">
+            <h4>Highest Sales Day</h4>
+            <p class="value" id="highestDayVal" style="font-size: 18px;">-</p>
+        </div>
+        <div class="stat-card">
+            <h4>Lowest Sales Day</h4>
+            <p class="value" id="lowestDayVal" style="font-size: 18px;">-</p>
+        </div>
+        <div class="stat-card">
+            <h4>Required / Day</h4>
+            <p class="value" id="reqPerDayVal" style="font-size: 20px;">৳ 0</p>
+        </div>
+    </div>
+
+    <!-- 3. Saturday → Thursday Weekly Sales Structure -->
+    <div class="card">
+        <h3>📅 Last Week's Sales — Saturday to Thursday</h3>
+        <div class="weekly-grid">
+            <div class="day-box">
+                <div class="day-name">Saturday</div>
+                <div class="day-val" id="satSales">৳ 0</div>
+            </div>
+            <div class="day-box">
+                <div class="day-name">Sunday</div>
+                <div class="day-val" id="sunSales">৳ 0</div>
+            </div>
+            <div class="day-box">
+                <div class="day-name">Monday</div>
+                <div class="day-val" id="monSales">৳ 0</div>
+            </div>
+            <div class="day-box">
+                <div class="day-name">Tuesday</div>
+                <div class="day-val" id="tueSales">৳ 0</div>
+            </div>
+            <div class="day-box">
+                <div class="day-name">Wednesday</div>
+                <div class="day-val" id="wedSales">৳ 0</div>
+            </div>
+            <div class="day-box">
+                <div class="day-name">Thursday</div>
+                <div class="day-val" id="thuSales">৳ 0</div>
+            </div>
+        </div>
+    </div>
+    <!-- মূল সেলস ডিটেইলস টেবিল -->
+    <div class="card">
+        <h3>📋 Detailed Sales Records</h3>
+        <div style="overflow-x: auto;">
+            <table id="salesRecordsTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ডাইনামিক ফিল্ড -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbw-PJcMD7E9fyJri1NF-uNHfSfbPERPZqXveM0uT0HLOeNocB8p_XIa9eudvUrkERNK/exec";
+    let globalSalesData = [];
+    let globalMonthlyTarget = 8330000;
+
+    const currentTheme = localStorage.getItem("theme") || "light";
+    const themeBtn = document.getElementById("themeToggleBtn");
+    if (currentTheme === "dark") {
+        themeBtn.innerText = "☀️ Mode";
+    }
+
+    function toggleTheme() {
+        let currentTheme = document.documentElement.getAttribute("data-theme");
+        let newTheme = currentTheme === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+        themeBtn.innerText = newTheme === "dark" ? "☀️ Mode" : "🌙 Mode";
+    }
+
+    // সব Amount/Target সম্পূর্ণ সংখ্যায় দেখাবে — Cr/Lac নয়
+    function formatFullAmount(amount) {
+        const n = Number(amount);
+        if (!Number.isFinite(n)) return "৳ 0";
+        return "৳ " + Math.round(n).toLocaleString("en-US");
+    }
+
+    // Date-কে YYYY-MM-DD এ normalize করে।
+    // Google Sheet থেকে Date object/ISO/CSV-style text—সব ধরনের common format সামলায়।
+    function normalizeDate(value) {
+        if (value === null || value === undefined || value === "") return "";
+
+        if (value instanceof Date && !isNaN(value.getTime())) {
+            return [
+                value.getFullYear(),
+                String(value.getMonth() + 1).padStart(2, "0"),
+                String(value.getDate()).padStart(2, "0")
+            ].join("-");
+        }
+
+        const raw = String(value).trim();
+
+        // YYYY-MM-DD বা YYYY-MM-DDTHH:mm:ss
+        let m = raw.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (m) {
+            return `${m[1]}-${String(m[2]).padStart(2, "0")}-${String(m[3]).padStart(2, "0")}`;
+        }
+
+        // DD/MM/YYYY বা DD-MM-YYYY
+        m = raw.match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+        if (m) {
+            return `${m[3]}-${String(m[2]).padStart(2, "0")}-${String(m[1]).padStart(2, "0")}`;
+        }
+
+        const parsed = new Date(raw);
+        if (!isNaN(parsed.getTime())) {
+            return [
+                parsed.getFullYear(),
+                String(parsed.getMonth() + 1).padStart(2, "0"),
+                String(parsed.getDate()).padStart(2, "0")
+            ].join("-");
+        }
+
+        return "";
+    }
+
+    function parseAmount(value) {
+        if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+        const cleaned = String(value ?? "").replace(/[৳,\s]/g, "");
+        const n = Number(cleaned);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function normalizeSalesRows(rows) {
+        if (!Array.isArray(rows)) return [];
+
+        return rows.map(row => ({
+            ...row,
+            date: normalizeDate(row.date),
+            amount: parseAmount(row.amount)
+        })).filter(row => row.date);
+    }
+
+    function getTodayLocal() {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }
+
+    function dateToInputValue(date) {
+        return [
+            date.getFullYear(),
+            String(date.getMonth() + 1).padStart(2, "0"),
+            String(date.getDate()).padStart(2, "0")
+        ].join("-");
+    }
+
+    function getMonthStart(date = getTodayLocal()) {
+        return new Date(date.getFullYear(), date.getMonth(), 1);
+    }
+
+    function getMonthEnd(date = getTodayLocal()) {
+        return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    }
+
+    function getWorkingDaysSatThu(monthDate = getTodayLocal()) {
+        const year = monthDate.getFullYear();
+        const month = monthDate.getMonth();
+        const days = [];
+
+        for (let d = 1; d <= new Date(year, month + 1, 0).getDate(); d++) {
+            const date = new Date(year, month, d);
+            const day = date.getDay(); // 0=Sun ... 5=Fri ... 6=Sat
+            if (day !== 5) days.push(date); // Friday excluded
+        }
+        return days;
+    }
+
+    function getCurrentMonthSales() {
+        const today = getTodayLocal();
+        const monthStart = dateToInputValue(getMonthStart(today));
+        const todayValue = dateToInputValue(today);
+
+        return globalSalesData.filter(row => {
+            return row.date >= monthStart && row.date <= todayValue;
+        });
+    }
+
+    function refreshDashboard() {
+        const btn = document.getElementById("refreshBtn");
+        const originalText = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="refresh-spin">↻</span> Loading...';
+
+        fetch(scriptURL, { cache: "no-store" })
+            .then(res => {
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                return res.json();
+            })
+            .then(data => {
+                globalMonthlyTarget = parseAmount(data.monthlyTarget || 8330000);
+                globalSalesData = normalizeSalesRows(data.sales || []);
+
+                // Keep currently selected filter if valid; otherwise use current month.
+                const from = document.getElementById("fromDate").value;
+                const to = document.getElementById("toDate").value;
+
+                if (from && to && from <= to) {
+                    const filtered = globalSalesData.filter(row =>
+                        row.date >= from && row.date <= to
+                    );
+                    processAndRender(filtered, true);
+                } else {
+                    const today = getTodayLocal();
+                    document.getElementById("fromDate").value = dateToInputValue(getMonthStart(today));
+                    document.getElementById("toDate").value = dateToInputValue(getMonthEnd(today));
+                    processAndRender(globalSalesData, false);
+                }
+
+                // Refresh notice text as well.
+                if (data.notes && data.notes.length) {
+                    document.getElementById("animatedNoteText").innerText = data.notes[0];
+                }
+            })
+            .catch(err => {
+                console.error("Refresh failed:", err);
+                alert("Dashboard refresh failed. Please check your internet connection.");
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+    }
+
+    function loadDashboardData() {
+        fetch(scriptURL)
+            .then(res => {
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                return res.json();
+            })
+            .then(data => {
+                if (data.notes && data.notes.length > 0) {
+                    let noteElement = document.getElementById("animatedNoteText");
+                    let noteIndex = 0;
+
+                    function updateNote() {
+                        noteElement.style.animation = "none";
+                        noteElement.offsetHeight;
+                        noteElement.style.animation = "fadeInOut 0.8s ease-in-out";
+                        noteElement.innerText = data.notes[noteIndex];
+                        noteIndex = (noteIndex + 1) % data.notes.length;
+                    }
+
+                    updateNote();
+                    if (data.notes.length > 1) setInterval(updateNote, 5000);
+                } else {
+                    document.getElementById("animatedNoteText").innerText =
+                        "TVS Wholesale System - Target and performance overview.";
+                }
+
+                globalMonthlyTarget = parseAmount(data.monthlyTarget || 8330000);
+                globalSalesData = normalizeSalesRows(data.sales || []);
+
+                const today = getTodayLocal();
+                const firstDay = dateToInputValue(getMonthStart(today));
+                const lastDay = dateToInputValue(getMonthEnd(today));
+
+                document.getElementById("fromDate").value = firstDay;
+                document.getElementById("toDate").value = lastDay;
+
+                processAndRender(globalSalesData);
+            })
+            .catch(err => {
+                console.error("Error loading data:", err);
+                document.getElementById("animatedNoteText").innerText =
+                    "Notice: Unable to load database data.";
+            });
+    }
+
+    function applyDateFilter() {
+        const from = document.getElementById("fromDate").value;
+        const to = document.getElementById("toDate").value;
+
+        if (from && to && from > to) {
+            alert("From Date cannot be later than To Date.");
+            return;
+        }
+
+        const filtered = globalSalesData.filter(row => {
+            const d = normalizeDate(row.date);
+            return (!from || d >= from) && (!to || d <= to);
+        });
+
+        processAndRender(filtered, true);
+    }
+
+    function resetDateFilter() {
+        const today = getTodayLocal();
+        document.getElementById("fromDate").value = dateToInputValue(getMonthStart(today));
+        document.getElementById("toDate").value = dateToInputValue(getMonthEnd(today));
+        processAndRender(globalSalesData, false);
+    }
+
+    function processAndRender(sales, isFiltered = false) {
+        sales = normalizeSalesRows(sales);
+
+        const totalSales = sales.reduce((sum, row) => sum + row.amount, 0);
+        const monthlyTarget = globalMonthlyTarget;
+
+        // KPI target/sales এখন সম্পূর্ণ সংখ্যা দেখাবে
+        const remainTarget = Math.max(0, monthlyTarget - totalSales);
+        const achievement = monthlyTarget > 0 ? (totalSales / monthlyTarget) * 100 : 0;
+
+        document.getElementById("totalSalesVal").innerText = formatFullAmount(totalSales);
+        document.getElementById("monthlyTargetVal").innerText = formatFullAmount(monthlyTarget);
+        document.getElementById("achievementPercentVal").innerText = achievement.toFixed(2) + "%";
+        document.getElementById("remainTargetVal").innerText = formatFullAmount(remainTarget);
+
+        document.getElementById("selectedDateRangeLabel").innerText =
+            isFiltered
+                ? `${document.getElementById("fromDate").value || "Start"} → ${document.getElementById("toDate").value || "End"}`
+                : "Current Month";
+
+        // Progress
+        const progress = Math.min(achievement, 100);
+        document.getElementById("progressText").innerText = achievement.toFixed(2) + "%";
+        document.getElementById("monthlyBar").style.width = progress + "%";
+
+        // Target status
+        const statusBadge = document.getElementById("targetStatusBadge");
+        if (achievement >= 40) {
+            statusBadge.className = "status-badge status-on-track";
+            statusBadge.innerText = "🟢 On Track";
+        } else if (achievement >= 20) {
+            statusBadge.className = "status-badge status-attention";
+            statusBadge.innerText = "🟡 Need Attention";
+        } else {
+            statusBadge.className = "status-badge status-behind";
+            statusBadge.innerText = "🔴 Behind Target";
+        }
+
+        // Projection — current month's elapsed working days অনুযায়ী
+        const today = getTodayLocal();
+        const monthStart = getMonthStart(today);
+        const currentMonthAll = getCurrentMonthSales();
+
+        const elapsedWorkingDays = getWorkingDaysSatThu(today)
+            .filter(d => d <= today).length;
+
+        const monthlyWorkingDays = getWorkingDaysSatThu(today).length;
+        const avgCurrentMonth =
+            elapsedWorkingDays > 0
+                ? currentMonthAll.reduce((s, r) => s + r.amount, 0) / elapsedWorkingDays
+                : 0;
+
+        const projectedSales = avgCurrentMonth * monthlyWorkingDays;
+        document.getElementById("projectedSalesVal").innerText = formatFullAmount(projectedSales);
+
+        // Average Daily Sales — selected sales-এর actual records দিয়ে
+        const avgDaily = sales.length > 0 ? totalSales / sales.length : 0;
+        document.getElementById("avgDailySalesVal").innerText = formatFullAmount(avgDaily);
+
+        // Highest / Lowest — full amount
+        if (sales.length > 0) {
+            const maxRow = sales.reduce((max, r) => r.amount > max.amount ? r : max, sales[0]);
+            const minRow = sales.reduce((min, r) => r.amount < min.amount ? r : min, sales[0]);
+
+            document.getElementById("highestDayVal").innerText =
+                `${maxRow.date} (${formatFullAmount(maxRow.amount)})`;
+
+            document.getElementById("lowestDayVal").innerText =
+                `${minRow.date} (${formatFullAmount(minRow.amount)})`;
+        } else {
+            document.getElementById("highestDayVal").innerText = "-";
+            document.getElementById("lowestDayVal").innerText = "-";
+        }
+
+        // Required / Day = Remaining Target ÷ remaining Sat-Thu working days
+        const todayValue = dateToInputValue(today);
+        const remainingWorkingDays = getWorkingDaysSatThu(today)
+            .filter(d => d > today).length;
+
+        const reqPerDay = remainingWorkingDays > 0
+            ? Math.max(0, monthlyTarget - currentMonthAll.reduce((s, r) => s + r.amount, 0)) / remainingWorkingDays
+            : 0;
+
+        document.getElementById("reqPerDayVal").innerText = formatFullAmount(reqPerDay);
+
+        // সর্বশেষ/current Sat-Thu cycle-এর actual daily sales
+        renderWeeklySales();
+
+        // Detailed records
+        renderSalesTable(sales);
+    }
+
+    function getCurrentSatThuCycle() {
+        const today = getTodayLocal();
+
+        // Current week's Saturday = previous/current Saturday.
+        // JS: Sat=6, Sun=0, Mon=1 ... Fri=5
+        const daysSinceSaturday = (today.getDay() + 1) % 7;
+        const saturday = new Date(today);
+        saturday.setDate(today.getDate() - daysSinceSaturday);
+
+        const days = [];
+        for (let i = 0; i < 6; i++) {
+            const d = new Date(saturday);
+            d.setDate(saturday.getDate() + i);
+            days.push(d);
+        }
+        return days; // Saturday -> Thursday
+    }
+
+    function renderWeeklySales() {
+        const ids = ["satSales", "sunSales", "monSales", "tueSales", "wedSales", "thuSales"];
+        const weekDays = getCurrentSatThuCycle();
+
+        ids.forEach((id, index) => {
+            const dateValue = dateToInputValue(weekDays[index]);
+            const amount = globalSalesData
+                .filter(row => row.date === dateValue)
+                .reduce((sum, row) => sum + row.amount, 0);
+
+            document.getElementById(id).innerText = formatFullAmount(amount);
+        });
+    }
+
+    function numberToWordsBD(amount) {
+        let n = Math.round(Number(amount) || 0);
+
+        if (n === 0) return "Zero Taka Only";
+
+        const ones = [
+            "", "One", "Two", "Three", "Four", "Five", "Six", "Seven",
+            "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen",
+            "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen",
+            "Nineteen"
+        ];
+
+        const tens = [
+            "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty",
+            "Seventy", "Eighty", "Ninety"
+        ];
+
+        function underThousand(num) {
+            let result = "";
+
+            if (num >= 100) {
+                result += ones[Math.floor(num / 100)] + " Hundred";
+                num %= 100;
+                if (num > 0) result += " ";
+            }
+
+            if (num >= 20) {
+                result += tens[Math.floor(num / 10)];
+                num %= 10;
+                if (num > 0) result += " " + ones[num];
+            } else if (num > 0) {
+                result += ones[num];
+            }
+
+            return result;
+        }
+
+        const crore = Math.floor(n / 10000000);
+        n %= 10000000;
+
+        const lakh = Math.floor(n / 100000);
+        n %= 100000;
+
+        const thousand = Math.floor(n / 1000);
+        n %= 1000;
+
+        const hundredPart = n;
+
+        const parts = [];
+
+        if (crore > 0) parts.push(underThousand(crore) + " Crore");
+        if (lakh > 0) parts.push(underThousand(lakh) + " Lakh");
+        if (thousand > 0) parts.push(underThousand(thousand) + " Thousand");
+        if (hundredPart > 0) parts.push(underThousand(hundredPart));
+
+        return parts.join(" ") + " Taka Only";
+    }
+
+    function renderSalesTable(sales) {
+        const table = document.querySelector("#salesRecordsTable");
+        const tbody = table.querySelector("tbody");
+
+        // পুরনো total footer থাকলে সরিয়ে দিই
+        const oldTfoot = table.querySelector("tfoot");
+        if (oldTfoot) oldTfoot.remove();
+
+        tbody.innerHTML = "";
+
+        if (!Array.isArray(sales) || sales.length === 0) {
+            tbody.innerHTML =
+                `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No records found for this date range</td></tr>`;
+        } else {
+            // তারিখ অনুযায়ী ascending order
+            const sorted = [...sales].sort((a, b) => a.date.localeCompare(b.date));
+
+            sorted.forEach(row => {
+                const d = new Date(row.date + "T00:00:00");
+                const dayName = isNaN(d.getTime())
+                    ? "-"
+                    : d.toLocaleDateString("en-US", { weekday: "long" });
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td style="font-weight: 500;">${row.date}</td>
+                    <td>
+                        <span style="background: var(--bg-color); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                            ${dayName}
+                        </span>
+                    </td>
+                    <td style="font-weight: 600; color: var(--success-color);">
+                        ${formatFullAmount(row.amount)}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // চলমান মাসের ALL sales-এর total
+        const currentMonthTotal = getCurrentMonthSales()
+            .reduce((sum, row) => sum + row.amount, 0);
+
+        const tfoot = document.createElement("tfoot");
+        tfoot.innerHTML = `
+            <tr>
+                <td colspan="2" style="text-align:right; font-weight:800; font-size:15px;">
+                    Current Month Total
+                </td>
+                <td style="font-weight:800; color:var(--primary-color); font-size:15px;">
+                    ${formatFullAmount(currentMonthTotal)}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align:right; font-weight:700; font-size:13px; color:var(--text-muted);">
+                    In Word
+                </td>
+                <td id="currentMonthTotalWords" style="font-weight:700; color:var(--text-color); font-size:13px; text-transform:capitalize;">
+                    ${numberToWordsBD(currentMonthTotal)}
+                </td>
+            </tr>
+        `;
+        table.appendChild(tfoot);
+    }
+
+    loadDashboardData();
+</script>
+
+</body>
+</html>
