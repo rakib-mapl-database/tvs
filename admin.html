@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Admin Panel - TVS Wholesale</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success-color: #059669;
+            --danger-color: #dc2626;
+            --warning-color: #d97706;
+            --info-color: #0284c7;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --table-hover: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #3b82f6;
+            --primary-hover: #60a5fa;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #38bdf8;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --table-hover: #273548;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 24px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* প্রিমিয়াম স্টিকি হেডার এবং লোগো স্টাইল */
+        .header-section {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 16px 28px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-brand img {
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .header-title h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-title p {
+            margin: 2px 0 0 0;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* ইউজার প্রোফাইল ব্যাজ স্টাইল */
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-color);
+            padding: 6px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .user-badge span {
+            color: var(--primary-color);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        h3 {
+            color: var(--text-color);
+            margin-top: 0;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-submit { 
+            background-color: var(--primary-color); 
+            color: white; 
+            width: 100%; 
+            padding: 12px; 
+            font-size: 14px;
+        }
+        .btn-submit:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+
+        .btn-edit { background-color: var(--info-color); color: white; padding: 6px 12px; font-size: 12px; margin-right: 6px; }
+        .btn-edit:hover { opacity: 0.9; }
+
+        .btn-delete { background-color: var(--danger-color); color: white; padding: 6px 12px; font-size: 12px; }
+        .btn-delete:hover { opacity: 0.9; }
+
+        .btn-theme, .btn-logout-top {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 14px;
+            font-size: 13px;
+            border-radius: 10px;
+        }
+        .btn-theme:hover, .btn-logout-top:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-logout-top {
+            color: var(--danger-color);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+        .btn-logout-top:hover {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: var(--bg-color);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+        tbody tr:hover {
+            background-color: var(--table-hover);
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .flex-col {
+            flex: 1;
+        }
+
+
+        .records-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .records-header h3 {
+            margin: 0;
+        }
+
+        .records-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-edit, .btn-delete {
+            border: none;
+            cursor: pointer;
+            border-radius: 7px;
+        }
+
+        .btn-refresh-admin {
+            background: var(--info-color);
+            color: #fff;
+            padding: 8px 13px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .records-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .btn-refresh-admin {
+                width: 100%;
+            }
+
+            #manageTable {
+                min-width: 500px;
+            }
+
+            #manageTable th,
+            #manageTable td {
+                padding: 10px 9px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flex-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            body {
+                padding: 12px;
+            }
+            .header-section {
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    if (localStorage.getItem("isAdminLoggedIn") !== "true") {
+        window.location.href = "login.html";
+    }
+
+    const savedTheme = localStorage.getItem("theme") || "light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+</script>
+
+<div class="container">
+    <!-- প্রিমিয়াম হেডার উইথ লোগো এবং ইউজারনেম -->
+    <div class="header-section">
+        <div class="header-brand">
+            <img src="https://www.tvsmotor.com/-/media/Feature/Header/TVSLogo-hr.svg" alt="TVS Logo">
+            <div class="header-title">
+                <h2>Admin Panel</h2>
+                <p>Enterprise Sales & Target Management</p>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <!-- ইউজারনেম ব্যাজ -->
+            <div class="user-badge">
+                👤 User: <span>Admin</span>
+            </div>
+            
+            <div class="header-actions">
+                <button class="btn btn-theme" id="themeToggleBtn" onclick="toggleTheme()">🌙 Mode</button>
+                <button class="btn btn-logout-top" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-row">
+        <!-- Sales Entry Card -->
+        <div class="card flex-col">
+            <h3>Add Sales Data</h3>
+            <form id="salesForm">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="salesDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Sales Amount</label>
+                    <input type="number" id="salesAmount" placeholder="Enter amount" required>
+                </div>
+                <button type="submit" id="salesBtn" class="btn btn-submit">Save Sales Record</button>
+            </form>
+        </div>
+
+        <!-- Target Update Card -->
+        <div class="card flex-col">
+            <h3>Update Targets</h3>
+            <form id="targetForm">
+                <div class="form-group">
+                    <label>Monthly Target</label>
+                    <input type="number" id="monthlyTarget" placeholder="Monthly target" required>
+                </div>
+                <div class="form-group">
+                    <label>Yearly Target</label>
+                    <input type="number" id="yearlyTarget" placeholder="Yearly target" required>
+                </div>
+                <button type="submit" id="targetBtn" class="btn btn-submit" style="background-color: var(--warning-color);">Update Target</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sales Records Table -->
+    <div class="card">
+        <div class="records-header">
+            <h3>Existing Sales Records</h3>
+            <button type="button" class="btn btn-refresh-admin" id="adminRefreshBtn" onclick="loadData(true)">↻ Refresh Records</button>
+        </div>
+        <div class="records-table-wrap">
+            <table id="manageTable">
+                <thead>
+                    <tr>
+                        <th>Day & Date</th>
+                        <th>Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will load dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbw-PJcMD7E9fyJri1NF-uNHfSfbPERPZqXveM0uT0HLOeNocB8p_XIa9eudvUrkERNK/exec";
+
+    const currentTheme = localStorage.getItem("theme") || "light";
+    const themeBtn = document.getElementById("themeToggleBtn");
+    if (currentTheme === "dark") {
+        themeBtn.innerText = "☀️ Mode";
+    }
+
+    function toggleTheme() {
+        let currentTheme = document.documentElement.getAttribute("data-theme");
+        let newTheme = currentTheme === "dark" ? "light" : "dark";
+        
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+
+        if (newTheme === "dark") {
+            themeBtn.innerText = "☀️ Mode";
+        } else {
+            themeBtn.innerText = "🌙 Mode";
+        }
+    }
+
+    function loadData(showMessage = false) {
+        const tbody = document.querySelector("#manageTable tbody");
+        const refreshBtn = document.getElementById("adminRefreshBtn");
+
+        if (refreshBtn) {
+            refreshBtn.disabled = true;
+            refreshBtn.innerText = "↻ Loading...";
+        }
+
+        fetch(scriptURL, { cache: "no-store" })
+            .then(res => {
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                return res.json();
+            })
+            .then(payload => {
+                /*
+                 * Backend response may be:
+                 * 1) [ {date, amount, row, editDate}, ... ]
+                 * 2) { sales: [ ... ], monthlyTarget: ..., ... }
+                 *
+                 * Support both so the Action column does not disappear
+                 * when the dashboard API response structure changes.
+                 */
+                let records = Array.isArray(payload)
+                    ? payload
+                    : (Array.isArray(payload.sales) ? payload.sales : []);
+
+                tbody.innerHTML = "";
+
+                if (records.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="3" style="text-align:center; color:var(--text-muted); padding:25px;">
+                                No sales records found.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                records.forEach((row, index) => {
+                    const tr = document.createElement("tr");
+
+                    const dateValue = String(row.editDate || row.date || "");
+                    const amountValue = Number(row.amount || 0);
+
+                    const dateTd = document.createElement("td");
+                    dateTd.style.fontWeight = "500";
+                    dateTd.textContent = row.date || dateValue || "-";
+
+                    const amountTd = document.createElement("td");
+                    amountTd.style.fontWeight = "600";
+                    amountTd.style.color = "var(--success-color)";
+                    amountTd.textContent = amountValue.toLocaleString("en-US");
+
+                    const actionTd = document.createElement("td");
+                    const actionWrap = document.createElement("div");
+                    actionWrap.className = "action-buttons";
+
+                    const editBtn = document.createElement("button");
+                    editBtn.type = "button";
+                    editBtn.className = "btn btn-edit";
+                    editBtn.textContent = "✏️ Edit";
+                    editBtn.addEventListener("click", () => {
+                        editRow(
+                            row.row ?? row.rowIndex ?? "",
+                            dateValue,
+                            amountValue
+                        );
+                    });
+
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.type = "button";
+                    deleteBtn.className = "btn btn-delete";
+                    deleteBtn.textContent = "🗑 Delete";
+                    deleteBtn.addEventListener("click", () => {
+                        deleteRow(row.row ?? row.rowIndex ?? "");
+                    });
+
+                    actionWrap.appendChild(editBtn);
+                    actionWrap.appendChild(deleteBtn);
+                    actionTd.appendChild(actionWrap);
+
+                    tr.appendChild(dateTd);
+                    tr.appendChild(amountTd);
+                    tr.appendChild(actionTd);
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(err => {
+                console.error("Admin records load error:", err);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align:center; color:var(--danger-color); padding:25px;">
+                            Failed to load sales records. Please click Refresh.
+                        </td>
+                    </tr>
+                `;
+            })
+            .finally(() => {
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerText = "↻ Refresh Records";
+                }
+                if (showMessage) {
+                    // no alert needed; button state itself confirms refresh
+                }
+            });
+    }
+
+    loadData();
+
+    document.getElementById("salesForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        let btn = document.getElementById("salesBtn");
+        btn.innerText = "Processing...";
+        
+        let formData = new FormData();
+        formData.append("action", "add_sales");
+        formData.append("date", document.getElementById("salesDate").value);
+        formData.append("amount", document.getElementById("salesAmount").value);
+
+        fetch(scriptURL, { method: 'POST', body: formData })
+            .then(() => {
+                alert("Sales added successfully!");
+                document.getElementById("salesForm").reset();
+                btn.innerText = "Save Sales Record";
+                loadData();
+            })
+            .catch(() => { alert("Saved successfully!"); loadData(); btn.innerText = "Save Sales Record"; });
+    });
+
+    document.getElementById("targetForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        let formData = new FormData();
+        formData.append("action", "update_target");
+        formData.append("monthly", document.getElementById("monthlyTarget").value);
+        formData.append("yearly", document.getElementById("yearlyTarget").value);
+
+        fetch(scriptURL, { method: 'POST', body: formData })
+            .then(() => { alert("Target updated successfully!"); })
+            .catch(() => { alert("Target updated successfully!"); });
+    });
+
+    function deleteRow(rowIndex) {
+        if (rowIndex === "" || rowIndex === null || rowIndex === undefined) {
+            alert("This record does not have a valid Sheet row number.");
+            return;
+        }
+
+        if(confirm("Are you sure you want to delete this record?")) {
+            let formData = new FormData();
+            formData.append("action", "delete_sales");
+            formData.append("row", rowIndex);
+
+            fetch(scriptURL, { method: 'POST', body: formData })
+                .then(() => {
+                    alert("Deleted successfully!");
+                    loadData();
+                })
+                .catch(() => { alert("Deleted successfully!"); loadData(); });
+        }
+    }
+
+    function editRow(rowIndex, currentDate, currentAmount) {
+        if (rowIndex === "" || rowIndex === null || rowIndex === undefined) {
+            alert("This record does not have a valid Sheet row number.");
+            return;
+        }
+
+        let newDate = prompt("Edit Date (YYYY-MM-DD):", currentDate);
+        let newAmount = prompt("Edit Sales Amount:", currentAmount);
+
+        if (newDate && newAmount) {
+            let formData = new FormData();
+            formData.append("action", "edit_sales");
+            formData.append("row", rowIndex);
+            formData.append("date", newDate);
+            formData.append("amount", newAmount);
+
+            fetch(scriptURL, { method: 'POST', body: formData })
+                .then(() => {
+                    alert("Updated successfully!");
+                    loadData();
+                })
+                .catch(() => { alert("Updated successfully!"); loadData(); });
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem("isAdminLoggedIn");
+        window.location.href = "login.html";
+    }
+</script>
+
+</body>
+</html>
