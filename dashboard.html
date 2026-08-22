@@ -6,22 +6,94 @@
 <title>TVS Wholesale — Analytics Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#697386;--border:#e5e7eb;--primary:#2563eb;--success:#16a34a;--danger:#dc2626;--warning:#d97706}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
-.header{background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;padding:24px 5%}.header-inner{max-width:1400px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:15px}.header h1{margin:0;font-size:26px}.header p{margin:5px 0 0;opacity:.8;font-size:13px}
-.nav{display:flex;gap:8px}.nav a,.nav button{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:white;padding:9px 13px;border-radius:9px;text-decoration:none;cursor:pointer}
-.container{max-width:1400px;margin:24px auto;padding:0 18px}.filters,.grid,.charts{display:grid;gap:16px}.filters{grid-template-columns:1fr 1fr auto auto}.filters input,.filters button{padding:11px;border:1px solid var(--border);border-radius:9px;background:white}.filters button{background:var(--primary);color:white;border:0;font-weight:700}
-.grid{grid-template-columns:repeat(4,1fr);margin:18px 0}.card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:19px;box-shadow:0 5px 20px rgba(15,23,42,.04)}.label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase}.value{font-size:25px;font-weight:800;margin-top:8px;font-variant-numeric:tabular-nums}.charts{grid-template-columns:2fr 1fr;margin-bottom:16px}.chart-box{height:330px}.wide{grid-column:1/-1}.chart-title{font-size:16px;font-weight:800;margin-bottom:4px}.sub{font-size:12px;color:var(--muted);margin-bottom:12px}
-.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}.insight{padding:16px;border-radius:13px;background:#f8fafc;border:1px solid var(--border)}.insight strong{display:block;font-size:13px;margin-bottom:7px}.insight span{font-size:20px;font-weight:800}
-.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:600px}th,td{padding:11px;border-bottom:1px solid var(--border);text-align:left}th{font-size:11px;color:var(--muted);text-transform:uppercase}td{font-size:13px}tfoot td{font-weight:800}
-@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}.insights{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.header-inner{align-items:flex-start;flex-direction:column}.header h1{font-size:21px}.container{padding:0 10px;margin-top:14px}.grid{grid-template-columns:1fr 1fr;gap:9px}.card{padding:13px}.value{font-size:18px}.charts{gap:10px}.chart-box{height:260px}.insights{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.filters button{grid-column:auto}.nav{width:100%}.nav a,.nav button{flex:1;text-align:center}}
+:root{
+  --bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--border:#e5e7eb;
+  --primary:#2563eb;--primary2:#1d4ed8;--success:#16a34a;--danger:#dc2626;--warning:#d97706;
+  --shadow:0 8px 28px rgba(15,23,42,.06);--shadow2:0 14px 38px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+radial-gradient(circle at 5% 0%,rgba(37,99,235,.07),transparent 28%),
+radial-gradient(circle at 95% 5%,rgba(22,163,74,.05),transparent 25%),var(--bg);
+color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+.header{
+background:linear-gradient(135deg,#0f172a 0%,#1e40af 58%,#2563eb 100%);
+color:#fff;padding:20px 5%;box-shadow:0 10px 30px rgba(15,23,42,.15);
+position:sticky;top:0;z-index:50
+}
+.header-inner{max-width:1400px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:18px}
+.header h1{margin:0;font-size:25px;letter-spacing:-.4px}
+.header p{margin:5px 0 0;opacity:.82;font-size:12px}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav a,.nav button{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.11);color:#fff;padding:9px 13px;border-radius:9px;text-decoration:none;cursor:pointer;font-weight:700;backdrop-filter:blur(8px);transition:.18s}
+.nav a:hover,.nav button:hover{background:rgba(255,255,255,.2);transform:translateY(-1px)}
+.container{max-width:1400px;margin:22px auto;padding:0 18px}
+.filters{display:grid;grid-template-columns:1fr 1fr auto auto;gap:10px}
+.filters input,.filters button{padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;min-height:42px}
+.filters input:focus{outline:2px solid rgba(37,99,235,.15);border-color:var(--primary)}
+.filters button{background:var(--primary);color:#fff;border:0;font-weight:800;cursor:pointer}
+.filters button:last-child{background:#eef2f7;color:#334155}
+.card{background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:15px;padding:19px;box-shadow:var(--shadow);transition:.18s}
+.card:hover{box-shadow:var(--shadow2);transform:translateY(-2px)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+.grid .card{position:relative;overflow:hidden}
+.grid .card:before{content:"";position:absolute;left:0;top:0;width:4px;height:100%;background:var(--primary)}
+.label{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.45px}
+.value{font-size:24px;font-weight:900;margin-top:8px;font-variant-numeric:tabular-nums;letter-spacing:-.4px}
+.charts{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
+.chart-box{height:315px;position:relative}
+.wide{grid-column:1/-1}
+.chart-title{font-size:16px;font-weight:900;margin-bottom:4px}
+.sub{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.insight{padding:17px;border-radius:13px;background:linear-gradient(180deg,#fff,#f8fafc);border:1px solid var(--border);box-shadow:var(--shadow)}
+.insight strong{display:block;font-size:12px;margin-bottom:7px;color:#475569}
+.insight span{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left}
+th{font-size:10px;color:var(--muted);text-transform:uppercase;background:#f8fafc;letter-spacing:.35px}
+td{font-size:13px}
+tbody tr:hover{background:#f8fafc}
+tfoot td{font-weight:900;background:#f8fafc}
+@media(max-width:900px){
+ .grid{grid-template-columns:repeat(2,1fr)}
+ .charts{grid-template-columns:1fr}
+ .insights{grid-template-columns:1fr 1fr}
+ .filters{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+ .header{position:static;padding:16px 12px}
+ .header-inner{align-items:flex-start;flex-direction:column}
+ .header h1{font-size:20px}
+ .header p{font-size:11px}
+ .nav{width:100%}
+ .nav a,.nav button{flex:1;text-align:center;padding:9px 8px;font-size:11px}
+ .container{padding:0 10px;margin-top:12px}
+ .grid{grid-template-columns:1fr 1fr;gap:9px}
+ .card{padding:13px;border-radius:13px}
+ .grid .card{min-width:0}
+ .label{font-size:9px}
+ .value{font-size:17px;white-space:nowrap}
+ .charts{gap:10px}
+ .chart-box{height:255px}
+ .insights{grid-template-columns:1fr;gap:9px}
+ .insight{padding:14px}
+ .filters{grid-template-columns:1fr 1fr;gap:7px}
+ .filters button{font-size:11px}
+ th,td{padding:10px 9px}
+}
+
+#refreshBtn:disabled{opacity:.72;cursor:wait;transform:none!important}
+#refreshBtn{min-width:92px}
+
 </style>
 </head>
 <body>
 <header class="header"><div class="header-inner">
 <div><h1>📊 TVS Wholesale Analytics</h1><p>Management Sales Trend & Performance Dashboard</p></div>
-<nav class="nav"><a href="index.html">🏠 Home</a><a href="login.html">🔐 Login</a><button onclick="loadData()">↻ Refresh</button></nav>
+<nav class="nav"><a href="index.html">🏠 Home</a><a href="login.html">🔐 Login</a><button type="button" id="refreshBtn" onclick="refreshDashboard()">↻ Refresh</button></nav>
 </div></header>
 <main class="container">
 <div class="card filters">
@@ -43,7 +115,7 @@
 <section class="insights">
 <div class="insight"><strong>🏆 Highest Sales Day</strong><span id="highest">—</span></div>
 <div class="insight"><strong>⚠️ Lowest Sales Day</strong><span id="lowest">—</span></div>
-<div class="insight"><strong>🎯 Required / Day</strong><span id="required">৳ 0</span></div>
+<div class="insight"><strong>🎯 Required / Day</strong><span id="required">৳ 0</span><small id="requiredNote" style="display:block;margin-top:7px;color:var(--muted);font-size:10px;font-weight:700">Based on remaining Sat–Thu working days</small></div>
 </section>
 <section class="card"><div class="chart-title">📋 Sales Records</div><div class="sub">Filtered actual records</div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Day</th><th>Sales Amount</th></tr></thead><tbody id="rows"></tbody><tfoot><tr><td colspan="2" style="text-align:right">Current Month Total</td><td id="monthTotal">৳ 0</td></tr><tr><td colspan="2" style="text-align:right">In Word</td><td id="monthWords">Zero Taka Only</td></tr></tfoot></table></div></section>
 </main>
@@ -55,21 +127,112 @@ function dateNorm(v){let s=String(v??"").trim(),m=s.match(/(\d{4})-(\d{1,2})-(\d
 function amount(v){let n=Number(String(v??"").replace(/[৳,\s]/g,""));return isFinite(n)?n:0}
 function words(n){n=Math.round(n);if(!n)return"Zero Taka Only";const o=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"],t=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];function u(x){let r="";if(x>=100){r=o[Math.floor(x/100)]+" Hundred";x%=100;if(x)r+=" "}if(x>=20){r+=t[Math.floor(x/10)];x%=10;if(x)r+=" "+o[x]}else if(x)r+=o[x];return r}let c=Math.floor(n/1e7);n%=1e7,l=Math.floor(n/1e5);n%=1e5,k=Math.floor(n/1e3);n%=1e3;let a=[];if(c)a.push(u(c)+" Crore");if(l)a.push(u(l)+" Lakh");if(k)a.push(u(k)+" Thousand");if(n)a.push(u(n));return a.join(" ")+" Taka Only"}
 function localToday(){let d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
-function iso(d){return d.toISOString().slice(0,10)}
+function iso(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 function sum(rows){return rows.reduce((a,r)=>a+r.amount,0)}
 function destroy(id){if(charts[id])charts[id].destroy()}
-function chart(id,type,labels,values,label){destroy(id);charts[id]=new Chart($(id),{type,data:{labels,datasets:[{label,data:values,borderWidth:3,tension:.3,fill:type==="line",backgroundColor:"rgba(37,99,235,.12)",borderColor:"#2563eb"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.raw)}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>"৳ "+Number(v).toLocaleString("en-US")}}}}})}
+function chart(id,type,labels,values,label){destroy(id);charts[id]=new Chart($(id),{type,data:{labels,datasets:[{label,data:values,borderWidth:3,tension:.3,fill:type==="line",backgroundColor:type==="bar"?"rgba(37,99,235,.78)":"rgba(37,99,235,.12)",borderColor:"#2563eb",borderRadius:type==="bar"?7:0,pointRadius:type==="line"?3:0,pointHoverRadius:type==="line"?6:0}]},options:{responsive:true,maintainAspectRatio:false,interaction:{intersect:false,mode:"index"},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.raw)}}},scales:{y:{beginAtZero:true,grid:{color:"rgba(148,163,184,.16)"},ticks:{callback:v=>"৳ "+Number(v).toLocaleString("en-US")}},x:{grid:{display:false}}}}})}
 function render(rows){let total=sum(rows),ach=target?total/target*100:0;$("total").textContent=money(total);$("target").textContent=money(target);$("achievement").textContent=ach.toFixed(2)+"%";$("remaining").textContent=money(Math.max(0,target-total));
 let daily={};rows.forEach(r=>daily[r.date]=(daily[r.date]||0)+r.amount);let ds=Object.keys(daily).sort();chart("trend","line",ds.map(x=>x.slice(5)),ds.map(x=>daily[x]),"Sales");
 let pct=Math.min(100,ach);destroy("gauge");charts.gauge=new Chart($("gauge"),{type:"doughnut",data:{labels:["Achieved","Remaining"],datasets:[{data:[pct,100-pct],backgroundColor:["#16a34a","#e5e7eb"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:"72%",plugins:{legend:{position:"bottom"},tooltip:{callbacks:{label:c=>c.label+": "+c.raw.toFixed(2)+"%"}}}}});
-let today=localToday(),sat=new Date(today);sat.setDate(today.getDate()-((today.getDay()+1)%7));let wl=["Sat","Sun","Mon","Tue","Wed","Thu"],wd=[],wv=[];for(let i=0;i<6;i++){let d=new Date(sat);d.setDate(sat.getDate()+i);let x=iso(d);wd.push(wl[i]);wv.push(sum(data.filter(r=>r.date===x)))}chart("week","bar",wd,wv,"Weekly");
+let today=localToday();
+let saturday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+saturday.setDate(saturday.getDate() - ((saturday.getDay() + 1) % 7));
+
+const weekLabels = ["Sat","Sun","Mon","Tue","Wed","Thu"];
+const weekValues = [];
+
+for (let i = 0; i < 6; i++) {
+  const d = new Date(
+    saturday.getFullYear(),
+    saturday.getMonth(),
+    saturday.getDate() + i
+  );
+
+  const dateKey = iso(d);
+  weekValues.push(
+    sum(data.filter(r => r.date === dateKey))
+  );
+}
+
+chart("week", "bar", weekLabels, weekValues, "Weekly");
 let now=new Date(),labels=[],vals=[];for(let i=0;i<12;i++){let d=new Date(now.getFullYear(),now.getMonth()-11+i,1);let p=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;labels.push(d.toLocaleString("en-US",{month:"short"}));vals.push(sum(data.filter(r=>r.date.startsWith(p))))}chart("months","bar",labels,vals,"Monthly");chart("monthlyTrend","line",labels,vals,"Monthly Sales");
 let sorted=[...rows].sort((a,b)=>b.amount-a.amount);$("highest").textContent=sorted.length?money(sorted[0].amount):"—";$("lowest").textContent=sorted.length?money(sorted.at(-1).amount):"—";
 let mprefix=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`,mt=sum(data.filter(r=>r.date.startsWith(mprefix)));$("monthTotal").textContent=money(mt);$("monthWords").textContent=words(mt);
-let rem=new Date(today.getFullYear(),today.getMonth()+1,0).getDate()-today.getDate();$("required").textContent=money(rem>0?Math.max(0,target-mt)/rem:0);
-$("rows").innerHTML=rows.length?rows.sort((a,b)=>a.date.localeCompare(b.date)).map(r=>`<tr><td>${r.date}</td><td>${new Date(r.date+"T00:00:00").toLocaleDateString("en-US",{weekday:"long"})}</td><td>${money(r.amount)}</td></tr>`).join(""):`<tr><td colspan="3" style="text-align:center">No records found</td></tr>`}
+function remainingWorkingDaysSatThu(d){
+  let count=0, x=new Date(d);
+  const end=new Date(d.getFullYear(),d.getMonth()+1,0);
+  while(x<=end){
+    const day=x.getDay(); // 0 Sun ... 5 Fri ... 6 Sat
+    if(day!==5) count++;
+    x.setDate(x.getDate()+1);
+  }
+  return count;
+}
+let rem=remainingWorkingDaysSatThu(today);
+$("required").textContent=money(rem>0?Math.max(0,target-mt)/rem:0);
+$("required").setAttribute("title", rem>0 ? `Remaining target ÷ ${rem} remaining Sat–Thu working days` : "No remaining working days");$("requiredNote").textContent=rem>0?`Based on ${rem} remaining Sat–Thu working days`:"No remaining working days";
+$("rows").innerHTML=rows.length?rows.sort((a,b)=>a.date.localeCompare(b.date)).map(r=>`<tr><td>${r.date}</td><td>${new Date(r.date+"T12:00:00").toLocaleDateString("en-US",{weekday:"long"})}</td><td>${money(r.amount)}</td></tr>`).join(""):`<tr><td colspan="3" style="text-align:center">No records found</td></tr>`}
 function applyFilter(){let f=$("fromDate").value,t=$("toDate").value;render(data.filter(r=>(!f||r.date>=f)&&(!t||r.date<=t)))}
 function resetFilter(){let d=localToday(),s=new Date(d.getFullYear(),d.getMonth(),1),e=new Date(d.getFullYear(),d.getMonth()+1,0);$("fromDate").value=iso(s);$("toDate").value=iso(e);render(data)}
-function loadData(){fetch(scriptURL,{cache:"no-store"}).then(r=>r.json()).then(x=>{target=amount(x.monthlyTarget||8330000);data=(x.sales||[]).map(r=>({date:dateNorm(r.date),amount:amount(r.amount)})).filter(r=>r.date);resetFilter()}).catch(e=>alert("Unable to load dashboard data."))}
-loadData();
+function loadData(showStatus=false){
+  const btn=$("refreshBtn");
+  if(showStatus && btn){
+    btn.disabled=true;
+    btn.textContent="↻ Refreshing...";
+  }
+
+  const url=scriptURL + (scriptURL.includes("?") ? "&" : "?") + "_refresh=" + Date.now();
+
+  return fetch(url,{
+    method:"GET",
+    cache:"no-store",
+    headers:{"Accept":"application/json"}
+  })
+  .then(r=>{
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.json();
+  })
+  .then(x=>{
+    if(!x || typeof x!=="object") throw new Error("Invalid dashboard response");
+
+    target=amount(x.monthlyTarget || 8330000);
+    data=(Array.isArray(x.sales)?x.sales:[])
+      .map(r=>({date:dateNorm(r.date),amount:amount(r.amount)}))
+      .filter(r=>r.date);
+
+    resetFilter();
+
+    if(showStatus && btn){
+      btn.textContent="✓ Updated";
+      setTimeout(()=>btn.textContent="↻ Refresh",1200);
+    }
+    return data;
+  })
+  .catch(e=>{
+    console.error("Dashboard refresh error:",e);
+    if(showStatus){
+      alert("Refresh failed. Please check your internet connection or Google Sheet connection.");
+    }
+    throw e;
+  })
+  .finally(()=>{
+    if(showStatus && btn){
+      setTimeout(()=>{
+        btn.disabled=false;
+        btn.textContent="↻ Refresh";
+      },1200);
+    }
+  });
+}
+
+function refreshDashboard(){
+  loadData(true).catch(()=>{});
+}
+
+loadData(false).catch(()=>{});
 </script></body></html>
