@@ -1,43 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - TVS Wholesale</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 300px; }
-        h2 { text-align: center; color: #333; margin-bottom: 20px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; background: #007BFF; color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        .error { color: red; text-align: center; font-size: 14px; display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+<title>Admin Login - TVS Wholesale</title>
+<style>
+:root{--p:#2563eb;--pd:#1d4ed8;--navy:#0f172a;--text:#172033;--muted:#64748b;--border:#e2e8f0;--danger:#dc2626}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--text);display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(circle at 10% 10%,#dbeafe,transparent 30%),radial-gradient(circle at 90% 85%,#e0f2fe,transparent 28%),#f5f8fc;overflow:hidden}
+.wrap{width:min(920px,100%);display:grid;grid-template-columns:1.05fr .95fr;background:#fff;border-radius:25px;overflow:hidden;box-shadow:0 25px 70px rgba(15,23,42,.16)}
+.brand{background:linear-gradient(145deg,#0f172a,#172554 52%,#2563eb);color:#fff;padding:52px 45px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}.brand:after{content:"";position:absolute;width:380px;height:380px;border:1px solid #ffffff20;border-radius:50%;right:-200px;bottom:-200px;box-shadow:0 0 0 50px #ffffff04,0 0 0 100px #ffffff03}
+.logo{width:62px;height:62px;border-radius:17px;background:#ffffff18;border:1px solid #ffffff25;display:grid;place-items:center;font-size:29px;margin-bottom:22px}.brand h1{font-size:32px;line-height:1.08;margin:0 0 13px;letter-spacing:-.8px}.brand p{color:#ffffffc7;line-height:1.65;font-size:13px;max-width:380px;margin:0}.features{list-style:none;padding:0;margin:25px 0 0;display:grid;gap:10px}.features li{display:flex;align-items:center;gap:9px;font-size:12px;color:#ffffffdf}.features span{width:25px;height:25px;border-radius:8px;background:#ffffff14;display:grid;place-items:center}
+.login{padding:52px 45px;display:flex;flex-direction:column;justify-content:center}.login h2{margin:0;font-size:27px;letter-spacing:-.5px}.sub{margin:7px 0 28px;color:var(--muted);font-size:13px}.group{margin-bottom:16px}.group label{display:block;font-size:11px;font-weight:800;color:#334155;margin-bottom:7px;letter-spacing:.3px}.input{position:relative}.input i{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-style:normal;color:#94a3b8}.input input{width:100%;height:46px;padding:0 42px;border:1px solid var(--border);border-radius:11px;background:#f8fafc;outline:none;font-size:14px;color:var(--text)}.input input:focus{background:#fff;border-color:var(--p);box-shadow:0 0 0 4px #2563eb14}.eye{position:absolute;right:9px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;font-size:15px;padding:5px}.login-btn{width:100%;height:47px;border:0;border-radius:11px;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;font-weight:800;cursor:pointer;box-shadow:0 8px 20px #2563eb38;transition:.18s}.login-btn:hover{transform:translateY(-1px);box-shadow:0 11px 25px #2563eb4d}.login-btn:disabled{opacity:.7;cursor:wait}.error{display:none;margin:12px 0 0;padding:10px;border-radius:9px;background:#fef2f2;border:1px solid #fecaca;color:var(--danger);text-align:center;font-size:12px;font-weight:700}.back{display:block;text-align:center;margin-top:15px;color:var(--p);text-decoration:none;font-size:12px;font-weight:700}.security{text-align:center;color:#94a3b8;font-size:10px;margin-top:22px}
+@media(max-width:720px){body{padding:10px}.wrap{grid-template-columns:1fr;max-width:460px}.brand{padding:28px 24px;min-height:225px}.brand h1{font-size:26px}.features{grid-template-columns:1fr 1fr}.login{padding:30px 24px}}
+@media(max-width:390px){.features{grid-template-columns:1fr}.brand h1{font-size:23px}.login{padding:26px 20px}}
+</style>
 </head>
 <body>
-
-<div class="login-box">
-    <h2>Admin Login</h2>
-    <input type="text" id="userid" placeholder="User ID">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="checkLogin()">Login</button>
-    <p id="errorMsg" class="error">Invalid User ID or Password!</p>
-</div>
-
+<main class="wrap">
+<section class="brand"><div class="logo">📊</div><h1>TVS Wholesale<br>Management Portal</h1><p>Secure access to sales performance, targets, analytics and wholesale management records.</p><ul class="features"><li><span>📈</span>Sales Analytics</li><li><span>🎯</span>Target Tracking</li><li><span>📋</span>Sales Records</li><li><span>🔄</span>Live Data Refresh</li></ul></section>
+<section class="login">
+<h2>Admin Login</h2><p class="sub">Sign in to access the administration panel.</p>
+<div class="group"><label for="userid">USER ID</label><div class="input"><i>👤</i><input id="userid" type="text" placeholder="Enter your User ID" autocomplete="username" onkeydown="enterKey(event)"></div></div>
+<div class="group"><label for="password">PASSWORD</label><div class="input"><i>🔒</i><input id="password" type="password" placeholder="Enter your password" autocomplete="current-password" onkeydown="enterKey(event)"><button class="eye" type="button" onclick="togglePassword()">👁</button></div></div>
+<button class="login-btn" id="loginBtn" type="button" onclick="checkLogin()">🔐 Secure Login</button>
+<p id="errorMsg" class="error">Invalid User ID or Password!</p>
+<a class="back" href="index.html">← Back to Dashboard</a>
+<div class="security">🔒 Authorized personnel only • TVS Wholesale Management System<br>Authorized users: Rakib &amp; Halim</div>
+</section>
+</main>
 <script>
-    function checkLogin() {
-        let user = document.getElementById("userid").value;
-        let pass = document.getElementById("password").value;
-
-        // ডেটাবেজ চেক (আপনার শিটের তথ্য অনুযায়ী)
-        if (user === "Rakib" && pass === "rakib4488") {
-            localStorage.setItem("isAdminLoggedIn", "true");
-            window.location.href = "admin.html";
-        } else {
-            document.getElementById("errorMsg").style.display = "block";
-        }
-    }
+function togglePassword(){const x=document.getElementById("password"),b=document.querySelector(".eye");x.type=x.type==="password"?"text":"password";b.textContent=x.type==="password"?"👁":"🙈"}
+function enterKey(e){if(e.key==="Enter")checkLogin()}
+function checkLogin(){const u=document.getElementById("userid").value.trim(),p=document.getElementById("password").value,e=document.getElementById("errorMsg"),b=document.getElementById("loginBtn");e.style.display="none";if(!u||!p){e.textContent="Please enter User ID and Password.";e.style.display="block";return}b.disabled=true;b.textContent="⏳ Signing in...";if((u==="Rakib"&&p==="rakib4488")||(u==="Halim"&&p==="halim321")){localStorage.setItem("isAdminLoggedIn","true");localStorage.setItem("adminUser",u);window.location.href="admin.html"}else{e.textContent="Invalid User ID or Password!";e.style.display="block";b.disabled=false;b.textContent="🔐 Secure Login"}}
 </script>
-
 </body>
 </html>
