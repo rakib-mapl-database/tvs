@@ -348,6 +348,72 @@
                 flex-wrap: wrap;
             }
         }
+    
+        /* ===== Engine Lub Management ===== */
+        .oil-card {
+            border: 1px solid rgba(37, 99, 235, 0.18);
+            position: relative;
+            overflow: hidden;
+        }
+        .oil-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+        }
+        .oil-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .oil-badge {
+            font-size: 11px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.10);
+            color: var(--primary-color);
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        .oil-btn {
+            background: var(--success-color);
+            color: #fff;
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+        }
+        .oil-btn:hover {
+            opacity: .92;
+            transform: translateY(-1px);
+        }
+        .oil-cancel {
+            display: none;
+            margin-top: 8px;
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+        .oil-cancel.show { display: inline-flex; }
+        .oil-records {
+            margin-top: 24px;
+        }
+        #oilTable { min-width: 520px; }
+        .oil-qty {
+            font-weight: 700;
+            color: var(--success-color);
+        }
+        .empty-row {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 25px !important;
+        }
+
     </style>
 </head>
 <body>
@@ -417,6 +483,66 @@
                 <button type="submit" id="targetBtn" class="btn btn-submit" style="background-color: var(--warning-color);">Update Target</button>
             </form>
         </div>
+
+        <!-- Engine Lub Entry Card -->
+        <div class="card flex-col oil-card">
+            <h3 class="oil-title">
+                <span>🛢️ Engine Lub Entry</span>
+                <span class="oil-badge">Add / Edit / Delete</span>
+            </h3>
+
+            <form id="oilForm">
+                <input type="hidden" id="oilEditRow">
+
+                <div class="form-group">
+                    <label>Engine Lub Date</label>
+                    <input type="date" id="oilDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Engine Lub Qty</label>
+                    <input type="number" id="oilQty" min="0" step="1"
+                           placeholder="Enter quantity" required>
+                </div>
+
+                <button type="submit" id="oilBtn" class="btn oil-btn">
+                    🛢️ Add Engine Lub
+                </button>
+
+                <button type="button" id="oilCancelBtn"
+                        class="btn oil-cancel" onclick="cancelOilEdit()">
+                    Cancel Edit
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Engine Lub Records -->
+    <div class="card oil-records">
+        <div class="records-header">
+            <h3>🛢️ Engine Lub Records</h3>
+            <button type="button" class="btn btn-refresh-admin"
+                    id="oilRefreshBtn" onclick="loadData(true)">
+                ↻ Refresh Records
+            </button>
+        </div>
+
+        <div class="records-table-wrap">
+            <table id="oilTable">
+                <thead>
+                    <tr>
+                        <th>Day & Date</th>
+                        <th>Qty</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="3" class="empty-row">Loading Engine Lub records...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Sales Records Table -->
@@ -467,47 +593,58 @@
 
     function loadData(showMessage = false) {
         const tbody = document.querySelector("#manageTable tbody");
+        const oilTbody = document.querySelector("#oilTable tbody");
         const refreshBtn = document.getElementById("adminRefreshBtn");
+        const oilRefreshBtn = document.getElementById("oilRefreshBtn");
 
-        if (refreshBtn) {
-            refreshBtn.disabled = true;
-            refreshBtn.innerText = "↻ Loading...";
-        }
+        [refreshBtn, oilRefreshBtn].forEach(btn => {
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "↻ Loading...";
+            }
+        });
 
-        fetch(scriptURL, { cache: "no-store" })
-            .then(res => {
-                if (!res.ok) throw new Error("HTTP " + res.status);
-                return res.json();
-            })
-            .then(payload => {
-                /*
-                 * Backend response may be:
-                 * 1) [ {date, amount, row, editDate}, ... ]
-                 * 2) { sales: [ ... ], monthlyTarget: ..., ... }
-                 *
-                 * Support both so the Action column does not disappear
-                 * when the dashboard API response structure changes.
-                 */
-                let records = Array.isArray(payload)
-                    ? payload
-                    : (Array.isArray(payload.sales) ? payload.sales : []);
+        fetch(scriptURL + "?ts=" + Date.now(), {
+            cache: "no-store"
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.json();
+        })
+        .then(payload => {
+            const records = Array.isArray(payload)
+                ? payload
+                : (Array.isArray(payload.sales) ? payload.sales : []);
 
-                tbody.innerHTML = "";
+            const oilRecords = Array.isArray(payload.engineOil)
+                ? payload.engineOil
+                : [];
 
-                if (records.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="3" style="text-align:center; color:var(--text-muted); padding:25px;">
-                                No sales records found.
-                            </td>
-                        </tr>
-                    `;
-                    return;
+            // Targets
+            if (!Array.isArray(payload)) {
+                if (payload.monthlyTarget !== undefined) {
+                    document.getElementById("monthlyTarget").value =
+                        Number(payload.monthlyTarget) || 0;
                 }
+                if (payload.yearlyTarget !== undefined) {
+                    document.getElementById("yearlyTarget").value =
+                        Number(payload.yearlyTarget) || 0;
+                }
+            }
 
-                records.forEach((row, index) => {
+            // Sales table
+            tbody.innerHTML = "";
+
+            if (records.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="empty-row">
+                            No sales records found.
+                        </td>
+                    </tr>`;
+            } else {
+                records.forEach(row => {
                     const tr = document.createElement("tr");
-
                     const dateValue = String(row.editDate || row.date || "");
                     const amountValue = Number(row.amount || 0);
 
@@ -518,7 +655,8 @@
                     const amountTd = document.createElement("td");
                     amountTd.style.fontWeight = "600";
                     amountTd.style.color = "var(--success-color)";
-                    amountTd.textContent = amountValue.toLocaleString("en-US");
+                    amountTd.textContent =
+                        amountValue.toLocaleString("en-US");
 
                     const actionTd = document.createElement("td");
                     const actionWrap = document.createElement("div");
@@ -553,26 +691,95 @@
                     tr.appendChild(actionTd);
                     tbody.appendChild(tr);
                 });
-            })
-            .catch(err => {
-                console.error("Admin records load error:", err);
-                tbody.innerHTML = `
+            }
+
+            // Engine Lub table
+            oilTbody.innerHTML = "";
+
+            if (oilRecords.length === 0) {
+                oilTbody.innerHTML = `
                     <tr>
-                        <td colspan="3" style="text-align:center; color:var(--danger-color); padding:25px;">
-                            Failed to load sales records. Please click Refresh.
+                        <td colspan="3" class="empty-row">
+                            No Engine Lub records found.
                         </td>
-                    </tr>
-                `;
-            })
-            .finally(() => {
-                if (refreshBtn) {
-                    refreshBtn.disabled = false;
-                    refreshBtn.innerText = "↻ Refresh Records";
-                }
-                if (showMessage) {
-                    // no alert needed; button state itself confirms refresh
-                }
-            });
+                    </tr>`;
+            } else {
+                oilRecords.forEach((row, index) => {
+                    const tr = document.createElement("tr");
+                    const dateValue = String(row.editDate || row.date || "");
+                    const qtyValue = Number(row.qty ?? row.quantity ?? 0);
+
+                    const dateTd = document.createElement("td");
+                    dateTd.style.fontWeight = "500";
+                    dateTd.textContent = row.date || dateValue || "-";
+
+                    const qtyTd = document.createElement("td");
+                    qtyTd.className = "oil-qty";
+                    qtyTd.textContent =
+                        qtyValue.toLocaleString("en-US") + " Qty";
+
+                    const actionTd = document.createElement("td");
+                    const actionWrap = document.createElement("div");
+                    actionWrap.className = "action-buttons";
+
+                    const editBtn = document.createElement("button");
+                    editBtn.type = "button";
+                    editBtn.className = "btn btn-edit";
+                    editBtn.textContent = "✏️ Edit";
+                    editBtn.addEventListener("click", () => {
+                        editEngineOil(
+                            row.row ?? row.rowIndex ?? "",
+                            dateValue,
+                            qtyValue
+                        );
+                    });
+
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.type = "button";
+                    deleteBtn.className = "btn btn-delete";
+                    deleteBtn.textContent = "🗑 Delete";
+                    deleteBtn.addEventListener("click", () => {
+                        deleteEngineOil(row.row ?? row.rowIndex ?? "");
+                    });
+
+                    actionWrap.appendChild(editBtn);
+                    actionWrap.appendChild(deleteBtn);
+                    actionTd.appendChild(actionWrap);
+
+                    tr.appendChild(dateTd);
+                    tr.appendChild(qtyTd);
+                    tr.appendChild(actionTd);
+                    oilTbody.appendChild(tr);
+                });
+            }
+        })
+        .catch(err => {
+            console.error("Admin records load error:", err);
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" style="text-align:center;color:var(--danger-color);padding:25px;">
+                        Failed to load sales records. Please click Refresh.
+                    </td>
+                </tr>`;
+
+            oilTbody.innerHTML = `
+                <tr>
+                    <td colspan="3" style="text-align:center;color:var(--danger-color);padding:25px;">
+                        Failed to load Engine Lub records.
+                    </td>
+                </tr>`;
+        })
+        .finally(() => {
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+                refreshBtn.innerText = "↻ Refresh Records";
+            }
+            if (oilRefreshBtn) {
+                oilRefreshBtn.disabled = false;
+                oilRefreshBtn.innerText = "↻ Refresh Records";
+            }
+        });
     }
 
     loadData();
@@ -653,6 +860,135 @@
                 .catch(() => { alert("Updated successfully!"); loadData(); });
         }
     }
+
+
+    // ===== Engine Lub CRUD =====
+    function resetOilButton() {
+        const btn = document.getElementById("oilBtn");
+        const cancel = document.getElementById("oilCancelBtn");
+        if (btn) {
+            btn.innerText = "🛢️ Add Engine Lub";
+            btn.classList.remove("btn-submit");
+        }
+        if (cancel) cancel.classList.remove("show");
+    }
+
+    function cancelOilEdit() {
+        document.getElementById("oilForm").reset();
+        document.getElementById("oilEditRow").value = "";
+        resetOilButton();
+    }
+
+    function editEngineOil(rowIndex, currentDate, currentQty) {
+        if (rowIndex === "" || rowIndex === null || rowIndex === undefined) {
+            alert("This Engine Lub record does not have a valid Sheet row number.");
+            return;
+        }
+
+        document.getElementById("oilEditRow").value = rowIndex;
+        document.getElementById("oilDate").value = currentDate || "";
+        document.getElementById("oilQty").value = currentQty ?? "";
+
+        const btn = document.getElementById("oilBtn");
+        btn.innerText = "💾 Update Engine Lub";
+        document.getElementById("oilCancelBtn").classList.add("show");
+
+        document.getElementById("oilForm").scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    }
+
+    function deleteEngineOil(rowIndex) {
+        if (rowIndex === "" || rowIndex === null || rowIndex === undefined) {
+            alert("This Engine Lub record does not have a valid Sheet row number.");
+            return;
+        }
+
+        if (!confirm("Are you sure you want to delete this Engine Lub record?")) {
+            return;
+        }
+
+        const fd = new FormData();
+        fd.append("action", "delete_engine_oil");
+        fd.append("row", rowIndex);
+
+        fetch(scriptURL + "?ts=" + Date.now(), {
+            method: "POST",
+            body: fd
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (!result.success) {
+                throw new Error(result.error || "Delete failed.");
+            }
+            alert("Engine Lub deleted successfully!");
+            loadData();
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Engine Lub delete failed: " + err.message);
+        });
+    }
+
+    document.getElementById("oilForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const btn = document.getElementById("oilBtn");
+        const editRow = document.getElementById("oilEditRow").value.trim();
+        const date = document.getElementById("oilDate").value;
+        const qty = document.getElementById("oilQty").value;
+
+        if (!date || qty === "") {
+            alert("Please enter Engine Lub date and quantity.");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = editRow
+            ? "Updating..."
+            : "Saving...";
+
+        const fd = new FormData();
+        fd.append("action", editRow ? "edit_engine_oil" : "add_engine_oil");
+        fd.append("date", date);
+        fd.append("qty", qty);
+
+        if (editRow) fd.append("row", editRow);
+
+        fetch(scriptURL + "?ts=" + Date.now(), {
+            method: "POST",
+            body: fd
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (!result.success) {
+                throw new Error(result.error || "Server rejected the request.");
+            }
+
+            alert(editRow
+                ? "Engine Lub updated successfully!"
+                : "Engine Lub added successfully!"
+            );
+
+            document.getElementById("oilForm").reset();
+            document.getElementById("oilEditRow").value = "";
+            resetOilButton();
+            loadData();
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Engine Lub save failed: " + err.message);
+        })
+        .finally(() => {
+            btn.disabled = false;
+            if (document.getElementById("oilEditRow").value) {
+                btn.innerText = "💾 Update Engine Lub";
+            } else {
+                btn.innerText = "🛢️ Add Engine Lub";
+            }
+        });
+    });
 
     function logout() {
         localStorage.removeItem("isAdminLoggedIn");
