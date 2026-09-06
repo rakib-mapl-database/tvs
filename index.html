@@ -136,6 +136,125 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
 #salesRecordsTable tfoot td{font-weight:900;background:var(--bg);border-top:2px solid var(--border)}
 .refresh-spin{display:inline-block;animation:refreshSpin .8s linear infinite}
 @keyframes refreshSpin{to{transform:rotate(360deg)}}
+
+/* ================= ENGINE OIL CARD ================= */
+.engine-oil-card{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(245,158,11,.13), transparent 28%),
+    var(--card);
+}
+.engine-oil-card:before{
+  background:linear-gradient(180deg,#f59e0b,#dc2626) !important;
+}
+.engine-oil-card .value{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.engine-oil-visual{
+  position:absolute;
+  right:10px;
+  top:8px;
+  width:74px;
+  height:74px;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:2;
+}
+.engine-oil-gif{
+  width:74px;
+  height:74px;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 5px 8px rgba(0,0,0,.16));
+}
+.oil-can{
+  position:absolute;
+  left:5px;
+  bottom:2px;
+  width:34px;
+  height:39px;
+  border:3px solid currentColor;
+  border-radius:7px 7px 9px 9px;
+  color:#d97706;
+  background:linear-gradient(to top, rgba(245,158,11,.28) 0 55%, transparent 55%);
+  animation:oilCanFloat 2.2s ease-in-out infinite;
+}
+.oil-can:before{
+  content:"";
+  position:absolute;
+  left:8px;
+  top:-9px;
+  width:13px;
+  height:9px;
+  border:3px solid currentColor;
+  border-bottom:0;
+  border-radius:4px 4px 0 0;
+}
+.oil-can:after{
+  content:"";
+  position:absolute;
+  right:-10px;
+  top:8px;
+  width:10px;
+  height:6px;
+  border:3px solid currentColor;
+  border-left:0;
+  border-radius:0 5px 5px 0;
+}
+.oil-drop{
+  position:absolute;
+  width:8px;
+  height:12px;
+  background:#f59e0b;
+  border-radius:70% 30% 65% 35%;
+  transform:rotate(45deg);
+  animation:oilDrop 1.8s ease-in infinite;
+}
+.oil-drop.d1{right:1px;top:2px;animation-delay:0s}
+.oil-drop.d2{right:14px;top:-4px;animation-delay:.65s;transform:rotate(45deg) scale(.75)}
+.oil-wave{
+  position:absolute;
+  left:9px;
+  bottom:8px;
+  width:25px;
+  height:5px;
+  border-top:2px solid rgba(217,119,6,.75);
+  border-radius:50%;
+  animation:oilWave 1.3s ease-in-out infinite;
+}
+.engine-oil-unit{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  margin-left:2px;
+}
+.engine-oil-card .trend{
+  color:#d97706;
+}
+@keyframes oilCanFloat{
+  0%,100%{transform:translateY(0) rotate(-1deg)}
+  50%{transform:translateY(-4px) rotate(1deg)}
+}
+@keyframes oilDrop{
+  0%{opacity:0;transform:translateY(-7px) rotate(45deg) scale(.75)}
+  20%{opacity:1}
+  75%{opacity:1}
+  100%{opacity:0;transform:translateY(17px) rotate(45deg) scale(.95)}
+}
+@keyframes oilWave{
+  0%,100%{transform:scaleX(.8);opacity:.55}
+  50%{transform:scaleX(1.12);opacity:1}
+}
+@media(max-width:950px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .engine-oil-card .value{padding-right:48px}
+}
+
 @media(max-width:950px){
  .stats-grid{grid-template-columns:repeat(2,1fr)}
  .header-section{position:static}
@@ -190,7 +309,7 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
         </div>
         <div class="header-right">
              <a href="dashboard.html" class="btn">📊 Dashboard</a>
-            <a href="https://rakib-mapl-database.github.io/mapl-business/" class="btn-modina" target="_blank" rel="noopener noreferrer" title="Modina Auto Parts Ltd.">
+            <a href="https://rakib-mapl-database.github.io/MAPL/" class="btn-modina" target="_blank" rel="noopener noreferrer" title="Modina Auto Parts Ltd.">
                 <img src="https://modinaautopartsltd.com/_next/static/media/logo.40df2f61.svg" alt="Modina Auto Parts Ltd.">
             </a>
             <a href="login.html" class="btn-login">🔑 Login</a>
@@ -223,27 +342,46 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
         </div>
     </div>
 
-    <!-- 2. Main KPI Cards (4 Cards) -->
+    <!-- 2. Main KPI Cards -->
     <div class="stats-grid">
         <div class="stat-card">
             <h4>Total Sales</h4>
             <p class="value" id="totalSalesVal">৳ 0</p>
             <div class="trend" id="selectedDateRangeLabel">Selected Period</div>
         </div>
+
         <div class="stat-card">
             <h4>Monthly Target</h4>
             <p class="value" id="monthlyTargetVal">৳ 0</p>
             <div class="trend">Target Sheet Value</div>
         </div>
+
         <div class="stat-card">
             <h4>Achievement %</h4>
             <p class="value" id="achievementPercentVal">0.00%</p>
             <div class="trend up" id="achSubText">Sales ÷ Target</div>
         </div>
+
         <div class="stat-card">
             <h4>Remaining Target</h4>
             <p class="value" id="remainTargetVal">৳ 0</p>
             <div class="trend down">Pending Balance</div>
+        </div>
+
+        <!-- Animated Engine Oil Total Qty -->
+        <div class="stat-card engine-oil-card">
+            <div class="engine-oil-visual" aria-hidden="true">
+                <img class="engine-oil-gif"
+                     src="https://media.tenor.com/zsb1PYeFEFYAAAAM/sad-oil.gif"
+                     alt="Engine Oil Animation"
+                     loading="eager">
+            </div>
+            <h4>Engine Oil Total Qty</h4>
+            <p class="value">
+                <span id="engineOilQtyVal">0</span>
+                <span class="engine-oil-unit">Qty</span>
+            </p>
+            <div class="trend" id="engineOilRangeLabel">Selected Period</div>
         </div>
     </div>
 
@@ -338,6 +476,7 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
 <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbw-PJcMD7E9fyJri1NF-uNHfSfbPERPZqXveM0uT0HLOeNocB8p_XIa9eudvUrkERNK/exec";
     let globalSalesData = [];
+    let globalEngineOilData = [];
     let globalMonthlyTarget = 8330000;
 
     const currentTheme = localStorage.getItem("theme") || "light";
@@ -417,6 +556,21 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
         })).filter(row => row.date);
     }
 
+
+    // Engine Oil data: Google Sheet-এর D = Date, E = Qty
+    function normalizeEngineOilRows(rows) {
+        if (!Array.isArray(rows)) return [];
+
+        return rows.map(row => ({
+            date: normalizeDate(row.date),
+            qty: parseAmount(row.qty)
+        })).filter(row => row.date);
+    }
+
+    function getFilteredEngineOilQty(rows) {
+        return (rows || []).reduce((sum, row) => sum + parseAmount(row.qty), 0);
+    }
+
     function getTodayLocal() {
         const now = new Date();
         return new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -468,7 +622,7 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
         btn.disabled = true;
         btn.innerHTML = '<span class="refresh-spin">↻</span> Loading...';
 
-        fetch(scriptURL, { cache: "no-store" })
+        fetch(scriptURL + "?ts=" + Date.now(), { cache: "no-store" })
             .then(res => {
                 if (!res.ok) throw new Error("HTTP " + res.status);
                 return res.json();
@@ -476,6 +630,12 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
             .then(data => {
                 globalMonthlyTarget = parseAmount(data.monthlyTarget || 8330000);
                 globalSalesData = normalizeSalesRows(data.sales || []);
+                globalEngineOilData = normalizeEngineOilRows(
+                    Array.isArray(data.engineOil) ? data.engineOil : []
+                );
+
+// Backend also sends a verified total. Keep it as a fallback only.
+window.backendEngineOilTotalQty = Number(data.engineOilTotalQty || 0);
 
                 // Keep currently selected filter if valid; otherwise use current month.
                 const from = document.getElementById("fromDate").value;
@@ -493,6 +653,13 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
                     processAndRender(globalSalesData, false);
                 }
 
+                console.log("Google Sheet data:", {
+                    salesRows: globalSalesData.length,
+                    engineOilRows: globalEngineOilData.length,
+                    engineOilSample: globalEngineOilData.slice(0, 3),
+                    engineOilTotalQty: getFilteredEngineOilQty(globalEngineOilData)
+                });
+
                 // Refresh notice text as well.
                 if (data.notes && data.notes.length) {
                     document.getElementById("animatedNoteText").innerText = data.notes[0];
@@ -509,7 +676,7 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
     }
 
     function loadDashboardData() {
-        fetch(scriptURL)
+        fetch(scriptURL + "?ts=" + Date.now())
             .then(res => {
                 if (!res.ok) throw new Error("HTTP " + res.status);
                 return res.json();
@@ -537,6 +704,14 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
                 globalMonthlyTarget = parseAmount(data.monthlyTarget || 8330000);
                 globalSalesData = normalizeSalesRows(data.sales || []);
 
+                // IMPORTANT: Engine Oil data must also be loaded on initial page load.
+                globalEngineOilData = normalizeEngineOilRows(
+                    Array.isArray(data.engineOil) ? data.engineOil : []
+                );
+
+// Backend also sends a verified total. Keep it as a fallback only.
+window.backendEngineOilTotalQty = Number(data.engineOilTotalQty || 0);
+
                 const today = getTodayLocal();
                 const firstDay = dateToInputValue(getMonthStart(today));
                 const lastDay = dateToInputValue(getMonthEnd(today));
@@ -545,6 +720,13 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
                 document.getElementById("toDate").value = lastDay;
 
                 processAndRender(globalSalesData);
+
+                console.log("Google Sheet data:", {
+                    salesRows: globalSalesData.length,
+                    engineOilRows: globalEngineOilData.length,
+                    engineOilSample: globalEngineOilData.slice(0, 3),
+                    engineOilTotalQty: getFilteredEngineOilQty(globalEngineOilData)
+                });
             })
             .catch(err => {
                 console.error("Error loading data:", err);
@@ -591,6 +773,33 @@ tbody tr:hover{background:var(--table-hover,#f8fafc)}
         document.getElementById("monthlyTargetVal").innerText = formatFullAmount(monthlyTarget);
         document.getElementById("achievementPercentVal").innerText = achievement.toFixed(2) + "%";
         document.getElementById("remainTargetVal").innerText = formatFullAmount(remainTarget);
+
+        // Engine Oil Total Qty — একই date filter অনুযায়ী
+        const fromDate = document.getElementById("fromDate").value;
+        const toDate = document.getElementById("toDate").value;
+
+        const filteredEngineOil = globalEngineOilData.filter(row => {
+            return (!fromDate || row.date >= fromDate) &&
+                   (!toDate || row.date <= toDate);
+        });
+
+        let engineOilQty = getFilteredEngineOilQty(filteredEngineOil);
+
+// If the backend returned no detail rows (for example an old cached response),
+// use its verified current-month total on the default current-month view.
+if (filteredEngineOil.length === 0 &&
+    !isFiltered &&
+    Number(window.backendEngineOilTotalQty) > 0) {
+    engineOilQty = Number(window.backendEngineOilTotalQty);
+}
+
+document.getElementById("engineOilQtyVal").innerText =
+    Math.round(engineOilQty).toLocaleString("en-US");
+
+        document.getElementById("engineOilRangeLabel").innerText =
+            isFiltered
+                ? `${fromDate || "Start"} → ${toDate || "End"}`
+                : "Current Month";
 
         document.getElementById("selectedDateRangeLabel").innerText =
             isFiltered
